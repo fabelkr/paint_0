@@ -41,9 +41,7 @@ namespace paint_0
             ((System.ComponentModel.ISupportInitialize)(this.brushSizeTrackBar)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numBrushSize)).BeginInit();
             this.SuspendLayout();
-            // 
-            // canvas
-            // 
+
             this.canvas.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
