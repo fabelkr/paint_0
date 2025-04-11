@@ -21,6 +21,8 @@ namespace paint_0
         private int currentBrushSize = 3;
         private Brushes currentBrush;
         private Dictionary<string, Brushes> brushes = new Dictionary<string, Brushes>();
+        private Shapes currentShape;
+        private Tool currentTool = Tool.Brush;
 
 
 
@@ -40,6 +42,20 @@ namespace paint_0
             canvas.MouseUp += Canvas_MouseUp;
             btnClear.Click += BtnClear_Click;
             btnColor.Click += BtnColor_Click;
+            btnBlack.Click += (s, e) => { currentColor = Color.Black; currentPen.Color = currentColor; };
+            btnRed.Click += (s, e) => { currentColor = Color.FromArgb(192, 0, 0); currentPen.Color = currentColor; };
+            btnGreen.Click += (s, e) => { currentColor = Color.FromArgb(0, 192, 0); currentPen.Color = currentColor; };
+            btnBlue.Click += (s, e) => { currentColor = Color.FromArgb(51, 153, 255); currentPen.Color = currentColor; };
+            btnYellow.Click += (s, e) => { currentColor = Color.Yellow; currentPen.Color = currentColor; };
+            btnDBlue.Click += (s, e) => { currentColor = Color.DarkBlue; currentPen.Color = currentColor; };
+            btnGray.Click += (s, e) => { currentColor = Color.Gray; currentPen.Color = currentColor; };
+            btnPurple.Click += (s, e) => { currentColor = Color.Purple; currentPen.Color = currentColor; };
+            btnCanvasColor.Click += BtnCanvasCol;
+            btnSquare.Click += btnSquareC;
+            btnRect.Click += btnRectC;
+            btnEllipse.Click += btnEllipseC;
+            btnCircle.Click += btnCircleC;
+            cboBrushType.Click += btnBT;
 
             this.Resize += Form1_Resize;
         }
@@ -52,6 +68,7 @@ namespace paint_0
             brushes.Add("Calligraphy", new CalligraphyPen());
             brushes.Add("Oil Paint", new OilPaint());
             brushes.Add("Marker", new Marker());
+            brushes.Add("Eraser", new Eraser(canvas)); // Pass the canvas reference
             currentBrush = brushes["Default"];
         }
 
@@ -103,29 +120,92 @@ namespace paint_0
             }
         }
 
-        private void Canvas_MouseDown(object sender, MouseEventArgs e)
+        private void Canvas_MouseDown(object s, MouseEventArgs e)
         {
             isDrawing = true;
             previousPoint = e.Location;
+
+            // Initialize the current shape based on the selected tool
+            if (currentTool == Tool.Brush)
+            {
+                currentShape = null; // No shape is being drawn
+            }
+            else
+            {
+                switch (currentTool)
+                {
+                    case Tool.Square:
+                        currentShape = new Square();
+                        break;
+                    case Tool.Rectangle:
+                        currentShape = new ShapeRectangle();
+                        break;
+                    case Tool.Ellipse:
+                        currentShape = new Ellipse();
+                        break;
+                    case Tool.Circle:
+                        currentShape = new Circle();
+                        break;
+                }
+
+                if (currentShape != null)
+                {
+                    currentShape.StartPoint = e.Location;
+                }
+            }
         }
 
         private void Canvas_MouseMove(object sender, MouseEventArgs e)
         {
             if (isDrawing)
             {
-                using (Graphics g = Graphics.FromImage(canvasBitmap))
+                if (currentTool == Tool.Brush)
                 {
-                    g.SmoothingMode = SmoothingMode.AntiAlias;
-                    currentBrush.Draw(g, e.Location, previousPoint, currentPen);
+                    // Brush drawing logic
+                    using (Graphics g = Graphics.FromImage(canvasBitmap))
+                    {
+                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                        currentBrush.Draw(g, e.Location, previousPoint, currentPen);
+                    }
+                    canvas.Invalidate();
+                    previousPoint = e.Location;
                 }
-                canvas.Invalidate();
-                previousPoint = e.Location;
+                else if (currentShape != null)
+                {
+                    // Shape preview logic
+                    currentShape.EndPoint = e.Location;
+                    canvas.Invalidate();
+                    using (Graphics g = canvas.CreateGraphics())
+                    {
+                        g.SmoothingMode = SmoothingMode.AntiAlias;
+                        currentShape.Draw(g, currentPen);
+                    }
+                }
             }
         }
 
         private void Canvas_MouseUp(object sender, MouseEventArgs e)
         {
             isDrawing = false;
+
+            if (currentTool == Tool.Brush)
+            {
+                // No additional logic needed for brush
+            }
+            else if (currentShape != null)
+            {
+                currentShape.EndPoint = e.Location;
+
+                // Finalize the shape on the canvas
+                using (Graphics g = Graphics.FromImage(canvasBitmap))
+                {
+                    g.SmoothingMode = SmoothingMode.AntiAlias;
+                    currentShape.Draw(g, currentPen);
+                }
+
+                canvas.Invalidate();
+                currentShape = null; // Reset the current shape
+            }
         }
 
         private void BtnClear_Click(object sender, EventArgs e)
@@ -148,5 +228,47 @@ namespace paint_0
                 currentPen.Color = currentColor;
             }
         }
+
+        private void BtnCanvasCol(object sender, EventArgs e)
+        {
+            ColorDialog colorDialog = new ColorDialog();
+            colorDialog.Color = currentColor;
+
+            if (colorDialog.ShowDialog() == DialogResult.OK)
+            {
+                // Update the current background color
+                canvas.BackColor = colorDialog.Color;
+
+                // Clear the canvasBitmap with the new background color
+                using (Graphics g = Graphics.FromImage(canvasBitmap))
+                {
+                    g.Clear(colorDialog.Color);
+                }
+
+                // Refresh the canvas to reflect the changes
+                canvas.Invalidate();
+            }
+        }
+        private void btnSquareC(object sender, EventArgs e)
+        {
+            currentTool = Tool.Square;
+        }
+        private void btnRectC(object sender, EventArgs e)
+        {
+            currentTool = Tool.Rectangle;
+        }
+        private void btnEllipseC(object sender, EventArgs e)
+        {
+            currentTool = Tool.Ellipse;
+        }
+        private void btnCircleC(object sender, EventArgs e)
+        {
+            currentTool = Tool.Circle;
+        }
+        private void btnBT(object sender, EventArgs e)
+        {
+            currentTool = Tool.Brush;
+        }
+
     }
 }

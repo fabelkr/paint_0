@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace paint_0
 {
@@ -19,6 +20,26 @@ namespace paint_0
         public override void Draw(Graphics g, Point currentPoint, Point previousPoint, Pen pen)
         {
             g.DrawLine(pen, previousPoint, currentPoint);
+        }
+    }
+
+    public class Eraser : Brushes
+    {
+        private Control canvas;
+
+        public Eraser(Control canvas)
+        {
+            this.canvas = canvas;
+        }
+
+        public override void Draw(Graphics g, Point currentPoint, Point previousPoint, Pen pen)
+        {
+            using (Pen eraserPen = new Pen(canvas.BackColor, pen.Width))
+            {
+                eraserPen.StartCap = LineCap.Round;
+                eraserPen.EndCap = LineCap.Round;
+                g.DrawLine(eraserPen, previousPoint, currentPoint);
+            }
         }
     }
 
