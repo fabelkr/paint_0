@@ -68,7 +68,7 @@ namespace paint_0
             brushes.Add("Calligraphy", new CalligraphyPen());
             brushes.Add("Oil Paint", new OilPaint());
             brushes.Add("Marker", new Marker());
-            brushes.Add("Eraser", new Eraser(canvas)); // Pass the canvas reference
+            brushes.Add("Eraser", new Eraser(canvas));
             currentBrush = brushes["Default"];
         }
 
@@ -125,10 +125,9 @@ namespace paint_0
             isDrawing = true;
             previousPoint = e.Location;
 
-            // Initialize the current shape based on the selected tool
             if (currentTool == Tool.Brush)
             {
-                currentShape = null; // No shape is being drawn
+                currentShape = null;
             }
             else
             {
@@ -161,7 +160,6 @@ namespace paint_0
             {
                 if (currentTool == Tool.Brush)
                 {
-                    // Brush drawing logic
                     using (Graphics g = Graphics.FromImage(canvasBitmap))
                     {
                         g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -172,7 +170,6 @@ namespace paint_0
                 }
                 else if (currentShape != null)
                 {
-                    // Shape preview logic
                     currentShape.EndPoint = e.Location;
                     canvas.Invalidate();
                     using (Graphics g = canvas.CreateGraphics())
@@ -190,13 +187,11 @@ namespace paint_0
 
             if (currentTool == Tool.Brush)
             {
-                // No additional logic needed for brush
             }
             else if (currentShape != null)
             {
                 currentShape.EndPoint = e.Location;
 
-                // Finalize the shape on the canvas
                 using (Graphics g = Graphics.FromImage(canvasBitmap))
                 {
                     g.SmoothingMode = SmoothingMode.AntiAlias;
@@ -204,7 +199,7 @@ namespace paint_0
                 }
 
                 canvas.Invalidate();
-                currentShape = null; // Reset the current shape
+                currentShape = null;
             }
         }
 
@@ -236,16 +231,13 @@ namespace paint_0
 
             if (colorDialog.ShowDialog() == DialogResult.OK)
             {
-                // Update the current background color
                 canvas.BackColor = colorDialog.Color;
 
-                // Clear the canvasBitmap with the new background color
                 using (Graphics g = Graphics.FromImage(canvasBitmap))
                 {
                     g.Clear(colorDialog.Color);
                 }
 
-                // Refresh the canvas to reflect the changes
                 canvas.Invalidate();
             }
         }
